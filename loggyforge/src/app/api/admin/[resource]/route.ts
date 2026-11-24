@@ -80,7 +80,8 @@ export async function PATCH(request: Request, context: Context) {
   if (!field) return NextResponse.json({ error: "No supported field supplied." }, { status: 400 });
   await ensureSchema();
   const keyColumn = resource === "settings" ? '"key"' : '"id"';
-  const keyValue = resource === "settings" ? clean(body.key, 100) : id;
+  const keyValue: string =
+  resource === "settings" ? clean(body.key, 100) : String(id);
   if (resource === "settings" && !keyValue) return NextResponse.json({ error: "Setting key required." }, { status: 400 });
   if (resource === "settings" && /^(mpesa|billing|email)\./i.test(keyValue)) return NextResponse.json({ error: "Use Payments & Daraja to edit payment and email integration settings." }, { status: 400 });
   const result = await getPool().query(`UPDATE "${cfg.table}" SET "${field}"=$1, "updated_at"=now() WHERE ${keyColumn}=$2 RETURNING *`, [clean(body[field], 12000), keyValue]);
