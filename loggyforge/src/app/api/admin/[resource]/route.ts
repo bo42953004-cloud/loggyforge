@@ -89,7 +89,10 @@ export async function PATCH(request: Request, context: Context) {
     { status: 400 }
   );
 }
-  const result = await getPool().query(`UPDATE "${cfg.table}" SET "${field}"=$1, "updated_at"=now() WHERE ${keyColumn}=$2 RETURNING *`, [clean(body[field], 12000), keyValue]);
+  const result = await getPool().query(
+  `UPDATE "${cfg.table}" SET "${field}"=$1, "updated_at"=now() WHERE ${keyColumn}=$2 RETURNING *`,
+  [clean(String(body[field] ?? ""), 12000), keyValue]
+);
   if (!result.rowCount) return NextResponse.json({ error: "Record not found." }, { status: 404 });
   return NextResponse.json({ item: result.rows[0] });
 }
