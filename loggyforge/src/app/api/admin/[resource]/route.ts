@@ -83,7 +83,12 @@ export async function PATCH(request: Request, context: Context) {
   const keyValue: string =
   resource === "settings" ? clean(body.key, 100) : String(id);
   if (resource === "settings" && !keyValue) return NextResponse.json({ error: "Setting key required." }, { status: 400 });
-  if (resource === "settings" && /^(mpesa|billing|email)\./i.test(keyValue)) return NextResponse.json({ error: "Use Payments & Daraja to edit payment and email integration settings." }, { status: 400 });
+  if (resource === "settings" && /^(mpesa|billing|email)\./i.test(String(keyValue))) {
+  return NextResponse.json(
+    { error: "Use Payments & Daraja to edit payment and email integration settings." },
+    { status: 400 }
+  );
+}
   const result = await getPool().query(`UPDATE "${cfg.table}" SET "${field}"=$1, "updated_at"=now() WHERE ${keyColumn}=$2 RETURNING *`, [clean(body[field], 12000), keyValue]);
   if (!result.rowCount) return NextResponse.json({ error: "Record not found." }, { status: 404 });
   return NextResponse.json({ item: result.rows[0] });
